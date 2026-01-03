@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_html_conversion_paragraph(self):
@@ -31,6 +31,22 @@ class TestHTMLNode(unittest.TestCase):
         header_node = HTMLNode("h1","Header One",[paragraph_node],test_props)
         expected_output = f"HTMLNode({header_node.tag}, {header_node.value}, children: {header_node.children}, {header_node.props})"
         self.assertEqual(f"{header_node}",expected_output)
+        
+    def test_leaf_to_html_p(self):
+        node = LeafNode("p", 'Hello, world!')
+        self.assertEqual(node.to_html(), '<p>Hello, world!</p>')
+        
+    def test_leaf_to_html_link(self):
+        test_props = {
+            "href": "https://www.google.com",
+            "target": "_blank",
+        }
+        node = LeafNode("h1","Header One",test_props)
+        self.assertEqual(node.to_html(), '<h1 href="https://www.google.com" target="_blank">Header One</h1>')
+    
+    def test_leaf_to_html_raw(self):
+        node = LeafNode(None, 'Hello, world!')
+        self.assertEqual(node.to_html(), 'Hello, world!')
         
 if __name__ == '__main__':
     unittest.main()
