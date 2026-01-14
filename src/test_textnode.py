@@ -1,6 +1,9 @@
 import unittest
+from blocktype import *
 from textnode import *
-from text_markdown import *
+from operations_html import *
+from operations_markdown import *
+from operations_nodes import *
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -139,6 +142,12 @@ class TestTextNode(unittest.TestCase):
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
         
+    def test_extract_markdown_links(self):
+        matches = extract_markdown_links(
+            "This is text with a [link](https://amazon.com)"
+        )
+        self.assertListEqual([("link", "https://amazon.com")], matches)
+        
         
     def test_split_markdown(self):
         node = TextNode(
@@ -272,7 +281,7 @@ This is the same paragraph on a new line
                 "- This is a list\n- with items",
             ],
         )
-        
+    
     def test_markdown_empty(self):
         md = """
     This is **bolded** paragraph
@@ -288,6 +297,44 @@ This is the same paragraph on a new line
                 "- with items",
             ],
         )
-            
+        
+    def test_blocktype_codeblock(self):
+        block = "\n".join([
+    "```",
+    "This is a code snippet (I think)",
+    "It was probably said by someone really smart",
+    "And is crazy deep if you think about it",
+    "```"
+])
+        blockType = block_to_block_type(block)
+        self.assertEqual(blockType, BlockType.code)
+        
+    def test_blocktype_blockquote(self):
+        block = "\n".join([
+    "> This is a block quote",
+    "> It was probably said by someone really smart",
+    "> And is crazy deep if you think about it",
+])
+        blockType = block_to_block_type(block)
+        self.assertEqual(blockType, BlockType.quote)
+        
+    def test_blocktype_unorderedlist(self):
+        block = "\n".join([
+    "- This is an unordered list",
+    "- You can tell cause there aren't any numbers in the front",
+    "- Pretty straightforward innit",
+])
+        blockType = block_to_block_type(block)
+        self.assertEqual(blockType, BlockType.unordered_list)
+    
+    def test_blocktype_orderedlist(self):
+        block = "\n".join([
+    "1. This is an ordered list",
+    "2. It's got numbers",
+    "3. This format would have been nice to know before doing the lesson...",
+])
+        blockType = block_to_block_type(block)
+        self.assertEqual(blockType, BlockType.ordered_list)
+        
 if __name__ == "__main__":
     unittest.main()
