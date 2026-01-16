@@ -1,9 +1,8 @@
 import unittest
 from blocktype import *
 from textnode import *
-from operations_html import *
-from operations_markdown import *
-from operations_nodes import *
+from operations import *
+from operations import *
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -307,7 +306,7 @@ This is the same paragraph on a new line
     "```"
 ])
         blockType = block_to_block_type(block)
-        self.assertEqual(blockType, BlockType.code)
+        self.assertEqual(blockType, BlockType.CODE)
         
     def test_blocktype_blockquote(self):
         block = "\n".join([
@@ -316,7 +315,7 @@ This is the same paragraph on a new line
     "> And is crazy deep if you think about it",
 ])
         blockType = block_to_block_type(block)
-        self.assertEqual(blockType, BlockType.quote)
+        self.assertEqual(blockType, BlockType.QUOTE)
         
     def test_blocktype_unorderedlist(self):
         block = "\n".join([
@@ -325,7 +324,7 @@ This is the same paragraph on a new line
     "- Pretty straightforward innit",
 ])
         blockType = block_to_block_type(block)
-        self.assertEqual(blockType, BlockType.unordered_list)
+        self.assertEqual(blockType, BlockType.UNORDERED_LIST)
     
     def test_blocktype_orderedlist(self):
         block = "\n".join([
@@ -334,7 +333,7 @@ This is the same paragraph on a new line
     "3. This format would have been nice to know before doing the lesson...",
 ])
         blockType = block_to_block_type(block)
-        self.assertEqual(blockType, BlockType.ordered_list)
+        self.assertEqual(blockType, BlockType.ORDERED_LIST)
         
 if __name__ == "__main__":
     unittest.main()

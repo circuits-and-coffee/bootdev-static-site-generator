@@ -1,6 +1,6 @@
 from enum import Enum
 import re
-from htmlnode import HTMLNode
+from htmlnode import LeafNode
 
 class TextType(Enum):
     TEXT = "plain"
@@ -30,17 +30,17 @@ def text_node_to_html_node(text_node):
         raise Exception
     
     if text_node.text_type == TextType.TEXT:
-        return HTMLNode(None, text_node.text)
+        return LeafNode(None, text_node.text)
     elif text_node.text_type == TextType.BOLD:
-        return HTMLNode("b", text_node.text)
+        return LeafNode("b", text_node.text)
     elif text_node.text_type == TextType.ITALIC:
-        return HTMLNode("i", text_node.text)
+        return LeafNode("i", text_node.text)
     elif text_node.text_type == TextType.CODE:
-        return HTMLNode("code", text_node.text)
+        return LeafNode("code", text_node.text)
     elif text_node.text_type == TextType.LINK:
-        return HTMLNode("a", text_node.text, None, ["href"])
+        return LeafNode("a", text_node.text, ["href"])
     elif text_node.text_type == TextType.IMAGE:
-        return HTMLNode("img", text_node.text,None, ["src","alt"])
+        return LeafNode("img", text_node.text, ["src","alt"])
     return
 
     
