@@ -1,0 +1,2 @@
+# Run on Github Pages
+python3 src/main.py "/bootdev-static-site-generator/"
