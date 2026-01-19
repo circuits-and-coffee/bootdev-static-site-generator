@@ -1,15 +1,25 @@
-from textnode import TextNode
-print("hello world")
+import os
+import shutil
+from copystatic import copy_files_recursive
+from gencontent import generate_pages_recursive
 
 def main():
-    # The function should create a new TextNode object with some dummy values.
-    # Print the object, and make sure it looks like you'd expect. For example, my code printed:
+
+    # Initialize
+    source_dir = "./static"
+    public_dir = "./public"
+    dir_path_content = "./content"
+    template_path = "./template.html"
     
-    # TextNode(This is some anchor text, link, https://www.boot.dev)
+    # Clean public directory
+    if os.path.exists(public_dir):
+        shutil.rmtree(public_dir)
     
-    textnode = TextNode("This is some anchor text", "link", "https://www.boot.dev")
-    print(textnode)
-    return
+    # Copy files
+    copy_files_recursive(source_dir,public_dir)
+    
+    # Generate all pages!    
+    generate_pages_recursive(dir_path_content, template_path, public_dir) # Source directory, template path, destination (public) directory
 
 if __name__ == "__main__":
     main()

@@ -4,25 +4,32 @@ from htmlnode import *
 from textnode import *
 from operations import *
 
-# Jan 14th - Working on this method (and its helper methods)
 def markdown_to_html_node(markdown):
     # Converts a full markdown document (string) into a single parent HTMLNode (with a lot of children HTMLNodes)
     
     output_html = ParentNode('div',[]) # This is what we'll return at the very end with our children HTMLNodes
-    
     markdown_blocks = markdown_to_blocks(markdown)
     
+    # TODO: Refactor to separate functions (to improve readability)
     for block in markdown_blocks:
+        
         # Need to determine what kind of block this is
         block_type = block_to_block_type(block)
         
         if block_type == (BlockType.PARAGRAPH):
             lines = block.split("\n")
             new_lines = " ".join(lines)
+            # Check if it's an image only - this should not be wrapped in a paragraph parent node
             inline_children = text_to_html_children(new_lines)
-            paragraph_node = ParentNode('p', inline_children)
-            output_html.children.append(paragraph_node)
-            
+            if re.findall(r"!\[(.*?)\]\((.*?)\)",new_lines):
+                # Handle image-only element - doesn't require an enclosing <p> tag
+                child_image = LeafNode('img',"",inline_children[0].props)
+                output_html.children.append(child_image)
+                continue
+                
+            node = ParentNode('p', inline_children)
+            output_html.children.append(node)
+        
         elif block_type == (BlockType.HEADING):
             heading_level = block.count("#")
             cleaned_heading = block[heading_level:].strip()
@@ -39,11 +46,23 @@ def markdown_to_html_node(markdown):
             output_html.children.append(pre_node)
             
         elif block_type == BlockType.QUOTE:
+            cleaned_lines = []
             lines = block.split("\n")
-            combined_lines = " ".join(lines).replace("> ","")
-            inline_children = text_to_html_children(combined_lines)
-            paragraph_node = ParentNode('p', inline_children)
-            blockquote_node = ParentNode('blockquote',[paragraph_node])
+            for line in lines:
+                if line[0] != ">":
+                    raise ValueError("invalid quote block")
+                cleaned = line.lstrip(">").strip()
+                if cleaned:
+                    cleaned_lines.append(cleaned)
+
+            # Preserve line breaks inside the blockquote
+            full_text = "\n".join(cleaned_lines)
+
+            # Run inline markdown on the whole thing
+            inline_children = text_to_html_children(full_text)
+
+            # Blockquote is a parent wrapping those inline children
+            blockquote_node = ParentNode("blockquote", inline_children)
             output_html.children.append(blockquote_node)
 
         elif block_type == BlockType.ORDERED_LIST:
@@ -55,7 +74,6 @@ def markdown_to_html_node(markdown):
                 html_child = text_to_html_children(line)
                 li_node = ParentNode("li", html_child)
                 list_node.children.append(li_node)
-                
             output_html.children.append(list_node)
         
         elif block_type == BlockType.UNORDERED_LIST:
@@ -73,39 +91,13 @@ def markdown_to_html_node(markdown):
     html = output_html.to_html()
     return output_html
 
-
-
 def text_to_html_children(text):
-    ###
-    # Takes a string of text and returns a list of HTMLNodes
-    # that represent the inline markdown using previously created
-    # functions (think TextNode -> HTMLNode)
-    ###
     text_nodes = text_to_textnodes(text)
-    html_children = [text_node_to_html_node(tn) for tn in text_nodes]
-    return html_children
-            
-def format_markdown(text_lines):
-    # Go through each line and apply formatting? But what if one line has multiple formats?
-    for string in text_lines:
-        pass
-    
-            
-# This may not have been needed, but I made it and I want to keep it just in case :^)
-def paragraph_generator(markdown):
-    line_by_line_md = markdown.split("\n")
-    final_md_list = []
-    temp_node = []
-    for line in line_by_line_md:
-        if line == '':
-            # If temp_node is populated, move it into final_md_list and reset it
-            if len(temp_node) > 0:
-                final_md_list.append(' '.join(temp_node))
-                temp_node = []
-        else:
-            # We're appending to the last temp_node
-            temp_node.append(line)
-    return final_md_list
+    children = []
+    for text_node in text_nodes:
+        html_node = text_node_to_html_node(text_node)
+        children.append(html_node)
+    return children
 
 def split_nodes_image(old_nodes):
     output_nodes = []
@@ -148,12 +140,9 @@ def split_nodes_link(old_nodes):
             output_nodes.append(TextNode(old_node.text,TextType.TEXT))
             continue
         else:
-            
             for alt_text, link in links:
-                
                 markdown = f"[{alt_text}]({link})"
                 before, after = remaining_text.split(markdown, 1)
-
                 if before != "":
                     output_nodes.append(TextNode(before, TextType.TEXT))
                 output_nodes.append(TextNode(alt_text,TextType.LINK, link))
@@ -206,7 +195,6 @@ def extract_markdown_links(text):
     links = re.findall(link_text_regex, text)
     return links
 
-
 def markdown_to_blocks(markdown):
     # Separate incoming markdown into a list separated by newline characters
     output_blocks = []
@@ -217,30 +205,3 @@ def markdown_to_blocks(markdown):
             # Not empty, let's parse it
             output_blocks.append(cleaned_segment)
     return output_blocks
-
-        
-
-if __name__ == "__main__":
-    
-    #Simple paragraph markdown test
-#     markdown = """
-# This is a regular paragraph 
-# nothing unusual going on here
-# ...but formatting is fine, _right_?
-# """
-
-    #Blockquote markdown test
-    markdown = """
-> This is a block quote 
-> or at least I'm _hoping_...
-> ...I think **this** is right?
-"""
-
-    # Code block markdown test
-#     markdown = """
-# ```
-# This is text that _should_ remain
-# the **same** even with inline stuff
-# ```
-# """
-    markdown_to_html_node(markdown)

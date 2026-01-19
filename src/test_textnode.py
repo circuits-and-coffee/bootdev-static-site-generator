@@ -29,7 +29,6 @@ class TestTextNode(unittest.TestCase):
         node1 = TextNode("This is a text node", TextType.BOLD)
         self.assertEqual(repr(node1), "TextNode(This is a text node, TextType.BOLD, None)")
         
-        
     """
     Tests for functions
     """
@@ -58,17 +57,17 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.value, "This is a code node")
         
     def test_text_link(self):
-        node = TextNode("This is a link node", TextType.LINK)
+        node = TextNode("This is a link node", TextType.LINK,"test_link.com")
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "a")
-        self.assertEqual(html_node.props, ["href"])
+        self.assertEqual(html_node.props, {"href": "test_link.com"})
         self.assertEqual(html_node.value, "This is a link node")
         
     def test_text_image(self):
-        node = TextNode("", TextType.IMAGE)
+        node = TextNode("testing", TextType.IMAGE,"imageURL")
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, "img")
-        self.assertEqual(html_node.props, ["src","alt"])
+        self.assertEqual(html_node.props, {"src": "imageURL", "alt": "testing"})
         self.assertEqual(html_node.value, "")
         
     def test_text_delimiting_middle(self):
