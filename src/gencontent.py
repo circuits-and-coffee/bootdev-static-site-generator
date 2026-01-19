@@ -24,8 +24,8 @@ def generate_page(from_path, template_path, dest_file_path, basepath):
     
     # Replace the {{ Title }} and {{ Content }} placeholders in the template with the HTML and title you generated.
     template = template.replace("{{ Content }}",html).replace("{{ Title }}", title)
-    template = template.replace('href="/', f'"href="{basepath}"')
-    template = template.replace('src="/', f'"src="{basepath}"')
+    template = template.replace('href="/', f'href="{basepath}')
+    template = template.replace('src="/', f'src="{basepath}')
     if not os.path.exists(os.path.dirname(dest_file_path)):
         # Need to make the dir:
         os.makedirs(os.path.dirname(dest_file_path))
